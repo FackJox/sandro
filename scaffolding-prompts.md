@@ -68,7 +68,7 @@ Goal: Stand up Vitest and Playwright before shipping features.
 5. Run `yarn test:unit --runInBand` and `yarn test:e2e --reporter=list` to confirm the harness.
 ```
 
-### Prompt 2 — Content Schema & Helpers
+### Prompt 2 — Content Schema & Helpers V
 ```text
 Goal: Validate and type content before it reaches the UI.
 
