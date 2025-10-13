@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="color-scheme" content="light dark" />
+    %sveltekit.head%
+    <style>
+      html, body, #svelte { height: 100%; }
+      html, body { margin: 0; padding: 0; overscroll-behavior: none; }
+      body { touch-action: none; }
+    </style>
+  </head>
+  <body>
+    <div id="svelte">%sveltekit.body%</div>
+  </body>
+  <script>
+    // iOS dynamic viewport handling
+    if ('visualViewport' in window) {
+      const r = document.documentElement;
+      const update = () => {
+        r.style.setProperty('--dvh', window.visualViewport.height + 'px');
+        r.style.setProperty('--dvw', window.visualViewport.width + 'px');
+      };
+      window.visualViewport.addEventListener('resize', update, { passive: true });
+      update();
+    }
+  </script>
+</html>
+

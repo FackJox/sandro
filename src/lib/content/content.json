@@ -1,0 +1,51 @@
+{
+  "rows": [
+    {
+      "type": "photoGallery",
+      "slug": "photo",
+      "title": "PHOTO",
+      "items": [
+        { "slug": "desert-dawn", "title": "Desert Dawn", "image": "/images/photo/desert-dawn.jpg" }
+      ]
+    },
+    {
+      "type": "about",
+      "slug": "about",
+      "panels": [
+        { "kind": "text", "id": "bio-1" },
+        { "kind": "media", "src": "/images/about/portrait.jpg", "alt": "Portrait" },
+        { "kind": "text", "id": "bio-2" },
+        { "kind": "media", "src": "/images/about/secondary.jpg", "alt": "Secondary" }
+      ]
+    },
+    { "type": "hero", "slug": "hero" },
+    { "type": "contact", "slug": "contact" },
+    {
+      "type": "showreel",
+      "slug": "showreel",
+      "stills": ["/images/showreel/1.jpg", "/images/showreel/2.jpg"],
+      "externalUrl": "https://youtube.com/..."
+    },
+    {
+      "type": "services",
+      "slug": "services",
+      "items": ["MOUNTAIN DOP", "Service 2", "Service 3"],
+      "shutterstockUrl": "https://www.shutterstock.com/g/...",
+      "shutterstockLogo": "/images/logos/shutterstock.svg"
+    },
+    {
+      "type": "filmGallery",
+      "slug": "film",
+      "title": "FILM",
+      "items": [
+        {
+          "slug": "brand-film-x",
+          "title": "Brand Film X",
+          "poster": "/images/film/brand-film-x.jpg",
+          "externalUrl": "https://vimeo.com/..."
+        }
+      ]
+    }
+  ]
+}
+

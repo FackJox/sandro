@@ -1,0 +1,37 @@
+{
+  "name": "sandro-portfolio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "lint": "svelte-check --tsconfig ./tsconfig.json",
+    "test:unit": "node scripts/run-vitest.mjs",
+    "test:e2e": "playwright test",
+    "test:ci": "yarn lint && yarn test:unit --runInBand && yarn test:e2e --reporter=list"
+  },
+  "dependencies": {
+    "@sveltejs/kit": "^2.5.0",
+    "@threlte/core": "^7.2.0",
+    "@threlte/extras": "^8.2.0",
+    "gsap": "^3.12.5",
+    "three": "^0.160.0",
+    "svelte": "^4.2.18"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-vercel": "^5.3.0",
+    "@sveltejs/vite-plugin-svelte": "^3.1.0",
+    "@types/node": "^20.11.30",
+    "@testing-library/jest-dom": "^6.4.1",
+    "@testing-library/svelte": "^4.1.0",
+    "@playwright/test": "^1.45.0",
+    "jsdom": "^24.0.0",
+    "svelte-check": "^3.6.6",
+    "typescript": "^5.4.5",
+    "vite": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}
