@@ -1,8 +1,23 @@
-import { gutters, tileSize } from '$lib/config/geometry';
+import {
+  centerTile,
+  tileOrigin,
+  tileSpacing,
+  type CameraState,
+  type Viewport
+} from '$lib/config/geometry';
 
-export const colRowToPixels = (col: number, row: number) => {
-  const { w, h } = tileSize();
-  const { gx, gy } = gutters();
-  return { x: col * (w + gx), y: row * (h + gy) };
+type ViewportOverride = Partial<Viewport> | undefined;
+
+export const colRowToPixels = (col: number, row: number, viewport?: ViewportOverride) =>
+  tileOrigin(col, row, viewport);
+
+export const colRowToCamera = (col: number, row: number, viewport?: ViewportOverride): CameraState =>
+  centerTile(col, row, viewport);
+
+export const pixelsToColRow = (x: number, y: number, viewport?: ViewportOverride) => {
+  const spacing = tileSpacing(viewport);
+  return {
+    col: Math.round(x / spacing.x),
+    row: Math.round(y / spacing.y)
+  };
 };
-

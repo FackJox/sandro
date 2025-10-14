@@ -79,7 +79,7 @@ Goal: Validate and type content before it reaches the UI.
 5. Re-run `yarn test:unit`.
 ```
 
-### Prompt 3 — Geometry Utilities
+### Prompt 3 — Geometry Utilities V
 ```text
 Goal: Finalize viewport-derived geometry helpers.
 
