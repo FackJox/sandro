@@ -89,7 +89,7 @@ Goal: Finalize viewport-derived geometry helpers.
 4. Document any new exports in comments and rerun `yarn test:unit`.
 ```
 
-### Prompt 4 — Camera State Machine
+### Prompt 4 — Camera State Machine v
 ```text
 Goal: Replace the placeholder camera API with deterministic state management.
 
