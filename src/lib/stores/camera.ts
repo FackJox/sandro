@@ -1,10 +1,12 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
+import { gsap } from 'gsap';
 import { rows } from '$lib/content';
+import { motion } from '$lib/animation/motion';
 import {
+  commandFromFocus,
   createCameraController,
-  type CameraCommand,
-  type ControllerState,
-  type FocusState
+  type FocusState,
+  cameraFromCommand
 } from './camera-controller';
 import type { CameraState } from '$lib/config/geometry';
 
@@ -20,39 +22,43 @@ const initialFocus: FocusState = rows.length
   ? { kind: 'row', rowSlug: defaultRowSlug, tileIndex: 0 }
   : { kind: 'grid' };
 
+const initialCamera: CameraState = cameraFromCommand(
+  commandFromFocus(initialFocus),
+  {
+    rows,
+    grid: GRID_DIMENSIONS
+  }
+);
+
+export const camera = writable<CameraState>({ ...initialCamera });
+export const focus = writable<FocusState>({ ...initialFocus });
+
+const isVitest = typeof import.meta !== 'undefined' && (import.meta as any).vitest;
+const shouldUseImmediate = typeof window === 'undefined' && !isVitest;
+
 const controller = createCameraController(
   {
     rows,
     grid: GRID_DIMENSIONS
   },
-  { focus: initialFocus }
+  {
+    gsap,
+    motion: get(motion),
+    immediate: shouldUseImmediate,
+    onUpdate: (cameraState, focusState) => {
+      camera.set({ ...cameraState });
+      focus.set({ ...focusState });
+    }
+  },
+  { focus: initialFocus, camera: initialCamera }
 );
 
-const initialState = controller.getState();
-
-export const camera = writable<CameraState>(initialState.camera);
-export const focus = writable<FocusState>(initialState.focus);
-
-const applyState = (state: ControllerState) => {
-  camera.set({ ...state.camera });
-  focus.set({ ...state.focus });
-};
-
-const run = async (command: CameraCommand) => {
-  const { transition, state } = controller.issue(command);
-  applyState(state);
-  return transition;
-};
-
 export const api = {
-  /**
-   * Camera commands resolve once the controller reaches the requested focus.
-   */
-  zoomOutToGrid: () => run({ type: 'zoomOutToGrid' }),
+  zoomOutToGrid: () => controller.issue({ type: 'zoomOutToGrid' as const }),
   focusRow: (rowSlug: string, tileIndex?: number) =>
-    run({ type: 'focusRow', rowSlug, tileIndex }),
+    controller.issue({ type: 'focusRow', rowSlug, tileIndex }),
   focusTile: (rowSlug: string, tileSlug: string, tileIndex?: number) =>
-    run({ type: 'focusTile', rowSlug, tileSlug, tileIndex })
+    controller.issue({ type: 'focusTile', rowSlug, tileSlug, tileIndex })
 };
 
 export type { FocusState } from './camera-controller';

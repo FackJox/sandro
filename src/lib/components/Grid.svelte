@@ -25,7 +25,10 @@
     }
   };
 
-  $: transform = `translate3d(${- $camera.x}px, ${- $camera.y}px, 0) scale(${$camera.scale})`;
+  $: translateX = (-$camera.x).toFixed(2);
+  $: translateY = (-$camera.y).toFixed(2);
+  $: scale = $camera.scale.toFixed(4);
+  $: transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`;
 </script>
 
 <style>

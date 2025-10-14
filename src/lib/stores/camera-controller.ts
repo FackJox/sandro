@@ -1,8 +1,6 @@
 import { centerGrid, centerRow, centerTile, type CameraState } from '$lib/config/geometry';
 import type { Row } from '$lib/content';
-
-// Pure command-driven camera controller; state is mutated deterministically and
-// callers can read the resulting camera/keyframe targets without side effects.
+import type { MotionConfig } from '$lib/animation/motion';
 
 export type FocusState =
   | { kind: 'grid' }
@@ -20,6 +18,20 @@ export type ControllerConfig = {
   viewport?: { vw: number; vh: number };
 };
 
+type TimelineInstance = {
+  to(target: Record<string, number>, vars: Record<string, unknown>): TimelineInstance;
+  eventCallback(event: 'onUpdate' | 'onComplete' | 'onInterrupt', callback: () => void): TimelineInstance;
+  play(): TimelineInstance;
+  kill(): void;
+};
+
+export type ControllerDeps = {
+  gsap: { timeline: (vars?: Record<string, unknown>) => TimelineInstance };
+  motion: MotionConfig;
+  immediate?: boolean;
+  onUpdate?: (camera: CameraState, focus: FocusState) => void;
+};
+
 export type ControllerState = {
   focus: FocusState;
   camera: CameraState;
@@ -32,11 +44,17 @@ export type Transition = {
   command: CameraCommand;
 };
 
+type PendingCommand = {
+  command: CameraCommand;
+  resolve: (value: Transition | null) => void;
+  reject: (reason?: unknown) => void;
+};
+
 const DEFAULT_CAMERA: CameraState = { x: 0, y: 0, scale: 1 };
 const DEFAULT_FOCUS: FocusState = { kind: 'grid' };
 
-const cloneCommand = (command: CameraCommand): CameraCommand => ({ ...command });
 const cloneFocus = (focus: FocusState): FocusState => ({ ...focus });
+const cloneCommand = (command: CameraCommand): CameraCommand => ({ ...command });
 const cloneState = (state: ControllerState): ControllerState => ({
   focus: cloneFocus(state.focus),
   camera: { ...state.camera },
@@ -45,7 +63,7 @@ const cloneState = (state: ControllerState): ControllerState => ({
 
 const findRowIndex = (rows: Row[], slug: string) => rows.findIndex((row) => row.slug === slug);
 
-const resolveTileIndex = (row: Row, command: Extract<CameraCommand, { type: 'focusTile' }>): number => {
+const resolveTileIndex = (row: Row, command: Extract<CameraCommand, { type: 'focusTile' }>) => {
   if (command.tileIndex != null) return command.tileIndex;
   if (row.type === 'photoGallery' || row.type === 'filmGallery') {
     const items = row.items ?? [];
@@ -75,9 +93,7 @@ export const commandsEqual = (a: CameraCommand, b: CameraCommand) => {
   if (a.type !== b.type) return false;
   if (a.type === 'zoomOutToGrid') return true;
   if (a.type === 'focusRow' && b.type === 'focusRow') {
-    const aIndex = a.tileIndex ?? 0;
-    const bIndex = b.tileIndex ?? 0;
-    return a.rowSlug === b.rowSlug && aIndex === bIndex;
+    return a.rowSlug === b.rowSlug && (a.tileIndex ?? 0) === (b.tileIndex ?? 0);
   }
   if (a.type === 'focusTile' && b.type === 'focusTile') {
     return (
@@ -136,85 +152,169 @@ const resolveCommand = (
   }
 };
 
+const tweenFor = (command: CameraCommand, from: FocusState, motion: MotionConfig) => {
+  if (command.type === 'zoomOutToGrid') {
+    return motion.zoomOut;
+  }
+  if (command.type === 'focusRow') {
+    if (from.kind === 'grid') {
+      return motion.zoomIn;
+    }
+    return { duration: motion.verticalChange.pan, ease: motion.verticalChange.ease };
+  }
+  if (command.type === 'focusTile') {
+    if (from.kind === 'row') {
+      return motion.horizontalChange;
+    }
+    return motion.zoomIn;
+  }
+  return motion.zoomIn;
+};
+
 export const cameraFromCommand = (command: CameraCommand, config: ControllerConfig) =>
   resolveCommand(command, config).camera;
 
 export const focusFromCommand = (command: CameraCommand, config: ControllerConfig) =>
   resolveCommand(command, config).focus;
 
-const tailCommand = (queue: CameraCommand[], fallback: CameraCommand) =>
-  queue.length > 0 ? queue[queue.length - 1] : fallback;
+export const createCameraController = (
+  config: ControllerConfig,
+  deps: ControllerDeps,
+  initial?: Partial<ControllerState>
+) => {
+  const immediate = deps.immediate ?? false;
+  const notify = (camera: CameraState, focus: FocusState) => {
+    deps.onUpdate?.({ ...camera }, { ...focus });
+  };
 
-export const createCameraController = (config: ControllerConfig, initial?: Partial<ControllerState>) => {
   const initialFocus = initial?.focus ?? DEFAULT_FOCUS;
-  const initialCommand = commandFromFocus(initialFocus);
-  const resolvedInitial = resolveCommand(initialCommand, config);
-  const initialCamera = initial?.camera ?? resolvedInitial.camera;
+  const resolvedInitial = resolveCommand(commandFromFocus(initialFocus), config);
+
   let state: ControllerState = {
     focus: cloneFocus(resolvedInitial.focus),
-    camera: { ...initialCamera },
+    camera: initial?.camera ? { ...initial.camera } : { ...resolvedInitial.camera },
     queue: initial?.queue ? initial.queue.map(cloneCommand) : []
   };
 
-  const setState = (next: ControllerState) => {
-    state = cloneState(next);
-    return state;
+  notify(state.camera, state.focus);
+
+  let activeTimeline: TimelineInstance | null = null;
+  let activeCommand: CameraCommand | null = null;
+  const pending: PendingCommand[] = [];
+
+  const startNext = () => {
+    if (activeTimeline || pending.length === 0) {
+      return;
+    }
+
+    const { command, resolve, reject } = pending.shift()!;
+    state.queue = state.queue.slice(1);
+    activeCommand = command;
+
+    const fromState = cloneState(state);
+    const resolved = resolveCommand(command, config);
+    const toState: ControllerState = {
+      focus: resolved.focus,
+      camera: resolved.camera,
+      queue: state.queue.map(cloneCommand)
+    };
+
+    if (immediate) {
+      state.focus = cloneFocus(resolved.focus);
+      state.camera = { ...resolved.camera };
+      notify(state.camera, state.focus);
+      activeCommand = null;
+      resolve({ from: fromState, to: cloneState(state), command });
+      startNext();
+      return;
+    }
+
+    const targets = { ...state.camera };
+    const tween = tweenFor(command, fromState.focus, deps.motion);
+    const timeline = deps.gsap.timeline({ paused: true });
+    activeTimeline = timeline;
+
+    timeline.to(targets, {
+      x: resolved.camera.x,
+      y: resolved.camera.y,
+      scale: resolved.camera.scale,
+      duration: tween.duration,
+      ease: tween.ease,
+      onUpdate: () => {
+        state.camera = { ...targets };
+        notify(state.camera, resolved.focus);
+      }
+    });
+
+    timeline
+      .eventCallback('onComplete', () => {
+        timeline.kill();
+        activeTimeline = null;
+        activeCommand = null;
+        state.focus = cloneFocus(resolved.focus);
+        state.camera = { ...resolved.camera };
+        notify(state.camera, state.focus);
+        resolve({ from: fromState, to: cloneState(state), command });
+        startNext();
+      })
+      .eventCallback('onInterrupt', () => {
+        timeline.kill();
+        activeTimeline = null;
+        activeCommand = null;
+        reject(new Error('Camera animation interrupted'));
+        startNext();
+      });
+
+    timeline.play();
   };
 
   const enqueue = (command: CameraCommand) => {
-    const lastCommand = tailCommand(state.queue, commandFromFocus(state.focus));
-    if (commandsEqual(lastCommand, command)) {
-      return { enqueued: false, state: cloneState(state) };
+    const lastQueued = pending.length > 0 ? pending[pending.length - 1].command : null;
+    const comparisonTarget = lastQueued ?? activeCommand ?? commandFromFocus(state.focus);
+    if (commandsEqual(comparisonTarget, command)) {
+      return false;
     }
-    const nextState: ControllerState = {
-      focus: cloneFocus(state.focus),
-      camera: { ...state.camera },
-      queue: [...state.queue.map(cloneCommand), cloneCommand(command)]
-    };
-    setState(nextState);
-    return { enqueued: true, state: cloneState(state) };
+    return true;
   };
 
-  const step = (): Transition | null => {
-    if (state.queue.length === 0) return null;
-    const [command, ...rest] = state.queue;
-    const resolved = resolveCommand(command, config);
+  const issue = (command: CameraCommand) =>
+    new Promise<Transition | null>((resolve, reject) => {
+      if (!enqueue(command)) {
+        resolve(null);
+        return;
+      }
+      pending.push({ command: cloneCommand(command), resolve, reject });
+      state.queue = [...state.queue, cloneCommand(command)];
+      startNext();
+    });
 
-    const from = cloneState(state);
-    const to: ControllerState = {
-      focus: resolved.focus,
-      camera: resolved.camera,
-      queue: rest.map(cloneCommand)
-    };
-    setState(to);
-    return { from, to: cloneState(state), command: cloneCommand(command) };
-  };
-
-  const issue = (command: CameraCommand) => {
-    const { enqueued } = enqueue(command);
-    if (!enqueued) {
-      return { transition: null, state: cloneState(state) };
+  const reset = (next?: Partial<ControllerState>) => {
+    if (activeTimeline) {
+      activeTimeline.kill();
+      activeTimeline = null;
     }
-    const transition = step();
-    return { transition, state: cloneState(state) };
+    while (pending.length) {
+      pending.shift()?.resolve(null);
+    }
+    activeCommand = null;
+
+    const focus = next?.focus ?? DEFAULT_FOCUS;
+    const resolved = resolveCommand(commandFromFocus(focus), config);
+    const camera = next?.camera ? { ...next.camera } : { ...resolved.camera };
+    state = {
+      focus: cloneFocus(resolved.focus),
+      camera,
+      queue: next?.queue ? next.queue.map(cloneCommand) : []
+    };
+    notify(state.camera, state.focus);
+    return cloneState(state);
   };
+
+  const getState = () => cloneState(state);
 
   return {
-    getState: () => cloneState(state),
-    enqueue,
-    step,
     issue,
-    reset: (next?: Partial<ControllerState>) => {
-      const focus = next?.focus ?? DEFAULT_FOCUS;
-      const command = commandFromFocus(focus);
-      const resolved = resolveCommand(command, config);
-      const camera = next?.camera ?? resolved.camera;
-      setState({
-        focus: resolved.focus,
-        camera,
-        queue: next?.queue ? next.queue.map(cloneCommand) : []
-      });
-      return cloneState(state);
-    }
+    reset,
+    getState
   };
 };

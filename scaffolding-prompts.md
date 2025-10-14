@@ -99,7 +99,7 @@ Goal: Replace the placeholder camera API with deterministic state management.
 4. Ensure the controller is side-effect free so it can be tested in isolation; run `yarn test:unit`.
 ```
 
-### Prompt 5 — GSAP Integration & Visual Sync
+### Prompt 5 — GSAP Integration & Visual Sync V
 ```text
 Goal: Animate camera transitions across DOM and Threlte layers.
 
