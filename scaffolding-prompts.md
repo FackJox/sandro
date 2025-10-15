@@ -140,7 +140,7 @@ Goal: Translate pointer streams into high-level intents.
 4. Run `yarn test:unit`.
 ```
 
-### Prompt 9 — Gesture → Camera Wiring
+### Prompt 9 — Gesture → Camera Wiring V
 ```text
 Goal: Drive navigation from gesture intents.
 
