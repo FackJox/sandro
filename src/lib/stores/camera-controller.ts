@@ -63,7 +63,7 @@ const cloneState = (state: ControllerState): ControllerState => ({
 
 const findRowIndex = (rows: Row[], slug: string) => rows.findIndex((row) => row.slug === slug);
 
-const resolveTileIndex = (row: Row, command: Extract<CameraCommand, { type: 'focusTile' }>) => {
+const resolveTileIndex = (row: Row, command: { tileSlug: string; tileIndex?: number }) => {
   if (command.tileIndex != null) return command.tileIndex;
   if (row.type === 'photoGallery' || row.type === 'filmGallery') {
     const items = row.items ?? [];
@@ -142,7 +142,10 @@ const resolveCommand = (
         return { focus, camera: DEFAULT_CAMERA };
       }
       const row = config.rows[rowIndex];
-      const index = resolveTileIndex(row, command);
+      const index = resolveTileIndex(row, {
+        tileSlug: command.tileSlug,
+        tileIndex: command.tileIndex
+      });
       focus.tileIndex = index;
       return {
         focus,
@@ -269,9 +272,11 @@ export const createCameraController = (
   };
 
   const enqueue = (command: CameraCommand) => {
+    console.log('[camera-controller] enqueue', command);
     const lastQueued = pending.length > 0 ? pending[pending.length - 1].command : null;
     const comparisonTarget = lastQueued ?? activeCommand ?? commandFromFocus(state.focus);
     if (commandsEqual(comparisonTarget, command)) {
+      console.log('[camera-controller] enqueue skipped duplicate');
       return false;
     }
     return true;
@@ -279,12 +284,14 @@ export const createCameraController = (
 
   const issue = (command: CameraCommand) =>
     new Promise<Transition | null>((resolve, reject) => {
+      console.log('[camera-controller] issue', command);
       if (!enqueue(command)) {
         resolve(null);
         return;
       }
       pending.push({ command: cloneCommand(command), resolve, reject });
       state.queue = [...state.queue, cloneCommand(command)];
+      console.log('[camera-controller] queue length', state.queue.length);
       startNext();
     });
 

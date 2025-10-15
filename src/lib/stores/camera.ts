@@ -19,7 +19,7 @@ const GRID_DIMENSIONS = {
 const defaultRowSlug = rows.find((row) => row.type === 'hero')?.slug ?? rows[0]?.slug ?? 'hero';
 
 const initialFocus: FocusState = rows.length
-  ? { kind: 'row', rowSlug: defaultRowSlug, tileIndex: 0 }
+  ? { kind: 'row', rowSlug: defaultRowSlug }
   : { kind: 'grid' };
 
 const initialCamera: CameraState = cameraFromCommand(
@@ -46,6 +46,7 @@ const controller = createCameraController(
     motion: get(motion),
     immediate: shouldUseImmediate,
     onUpdate: (cameraState, focusState) => {
+      console.log('[camera] onUpdate -> focus', focusState);
       camera.set({ ...cameraState });
       focus.set({ ...focusState });
     }
@@ -54,11 +55,18 @@ const controller = createCameraController(
 );
 
 export const api = {
-  zoomOutToGrid: () => controller.issue({ type: 'zoomOutToGrid' as const }),
-  focusRow: (rowSlug: string, tileIndex?: number) =>
-    controller.issue({ type: 'focusRow', rowSlug, tileIndex }),
-  focusTile: (rowSlug: string, tileSlug: string, tileIndex?: number) =>
-    controller.issue({ type: 'focusTile', rowSlug, tileSlug, tileIndex })
+  zoomOutToGrid: () => {
+    console.log('[camera] api.zoomOutToGrid called');
+    return controller.issue({ type: 'zoomOutToGrid' });
+  },
+  focusRow: (rowSlug: string, tileIndex?: number) => {
+    console.log('[camera] api.focusRow called', { rowSlug, tileIndex });
+    return controller.issue({ type: 'focusRow', rowSlug, tileIndex });
+  },
+  focusTile: (rowSlug: string, tileSlug: string, tileIndex?: number) => {
+    console.log('[camera] api.focusTile called', { rowSlug, tileSlug, tileIndex });
+    return controller.issue({ type: 'focusTile', rowSlug, tileSlug, tileIndex });
+  }
 };
 
 export type { FocusState } from './camera-controller';

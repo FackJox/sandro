@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Canvas, OrthographicCamera } from '@threlte/core';
+  import { Canvas, T } from '@threlte/core';
   export let row: any;
   // TODO: implement masonry layout, pan/zoom, hit-testing, external open
 
@@ -20,7 +20,7 @@
 </script>
 
 <Canvas>
-  <OrthographicCamera
+  <T.OrthographicCamera
     makeDefault
     left={0}
     right={viewport.width}
