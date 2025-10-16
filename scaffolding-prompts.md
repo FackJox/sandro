@@ -150,7 +150,7 @@ Goal: Drive navigation from gesture intents.
 4. Re-run `yarn test:unit`.
 ```
 
-### Prompt 10 — Keyboard Parity & Focus
+### Prompt 10 — Keyboard Parity & Focus V
 ```text
 Goal: Mirror gesture behavior for keyboard users.
 

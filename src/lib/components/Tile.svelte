@@ -9,7 +9,7 @@
     height: 100vh;
     display: grid;
     place-items: center;
-    background: #0e0e0e;
+    background: #708090;
     color: white;
   }
   .title { font-size: clamp(20px, 4vw, 48px); letter-spacing: 0.05em; }

@@ -5,7 +5,11 @@
       "slug": "photo",
       "title": "PHOTO",
       "items": [
-        { "slug": "desert-dawn", "title": "Desert Dawn", "image": "/images/photo/desert-dawn.jpg" }
+        { "slug": "desert-dawn", "title": "Desert Dawn", "image": "/images/photo/desert-dawn.jpg" },
+        { "slug": "midnight-dunes", "title": "Midnight Dunes", "image": "/images/photo/midnight-dunes.jpg" },
+        { "slug": "alpine-lakes", "title": "Alpine Lakes", "image": "/images/photo/alpine-lakes.jpg" },
+        { "slug": "city-of-glass", "title": "City of Glass", "image": "/images/photo/city-of-glass.jpg" },
+        { "slug": "crimson-horizon", "title": "Crimson Horizon", "image": "/images/photo/crimson-horizon.jpg" }
       ]
     },
     {
@@ -23,13 +27,25 @@
     {
       "type": "showreel",
       "slug": "showreel",
-      "stills": ["/images/showreel/1.jpg", "/images/showreel/2.jpg"],
+      "stills": [
+        "/images/showreel/1.jpg",
+        "/images/showreel/2.jpg",
+        "/images/showreel/3.jpg",
+        "/images/showreel/4.jpg"
+      ],
       "externalUrl": "https://youtube.com/..."
     },
     {
       "type": "services",
       "slug": "services",
-      "items": ["MOUNTAIN DOP", "Service 2", "Service 3"],
+      "items": [
+        "MOUNTAIN DOP",
+        "Aerial Unit",
+        "Underwater Unit",
+        "Steadicam Operator",
+        "Lighting Design",
+        "Location Scouting"
+      ],
       "shutterstockUrl": "https://www.shutterstock.com/g/...",
       "shutterstockLogo": "/images/logos/shutterstock.svg"
     },
@@ -43,9 +59,26 @@
           "title": "Brand Film X",
           "poster": "/images/film/brand-film-x.jpg",
           "externalUrl": "https://vimeo.com/..."
+        },
+        {
+          "slug": "documentary-sierra",
+          "title": "Documentary Sierra",
+          "poster": "/images/film/documentary-sierra.jpg",
+          "externalUrl": "https://vimeo.com/.../sierra"
+        },
+        {
+          "slug": "music-video-neon",
+          "title": "Music Video Neon",
+          "poster": "/images/film/music-video-neon.jpg",
+          "externalUrl": "https://vimeo.com/.../neon"
+        },
+        {
+          "slug": "short-film-harbor",
+          "title": "Short Film Harbor",
+          "poster": "/images/film/short-film-harbor.jpg",
+          "externalUrl": "https://vimeo.com/.../harbor"
         }
       ]
     }
   ]
 }
-

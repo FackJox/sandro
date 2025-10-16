@@ -9,6 +9,9 @@
   import type { FocusState } from '$lib/stores/camera';
   import { initPointer } from '$lib/controls/pointer';
   import { initShortcuts } from '$lib/controls/shortcuts';
+  import { initScroll } from '$lib/controls/scroll';
+  import { initGestures } from '$lib/controls/gestures';
+  import { createZoomToggle } from '$lib/controls/zoom-toggle';
   import { contactCtaVisible } from '$lib/stores/ui';
 
   const GRID_STATE_KEY = '__grid_state';
@@ -100,7 +103,10 @@
   };
 
   onMount(() => {
+    const zoomToggle = createZoomToggle();
     const disposePointer = root ? initPointer(root) : undefined;
+    const disposeScroll = root ? initScroll(root, zoomToggle) : undefined;
+    const disposeGestures = initGestures(root, zoomToggle);
     const disposeShortcuts = initShortcuts();
     if (typeof window !== 'undefined') {
       (window as any).__cameraApi = api;
@@ -138,6 +144,9 @@
 
     return () => {
       disposePointer?.();
+      disposeScroll?.();
+      disposeGestures?.();
+      zoomToggle.dispose();
       disposeShortcuts?.();
       unsubscribe();
       unsubscribeFocus();
@@ -158,7 +167,7 @@
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    background: #050505;
+    background: #001836;
     color: white;
   }
 </style>

@@ -8,9 +8,10 @@
   import PhotoRow from '$lib/rows/PhotoRow.svelte';
   import FilmRow from '$lib/rows/FilmRow.svelte';
 
-  import { camera } from '$lib/stores/camera';
+  import { camera, focus, api } from '$lib/stores/camera';
+  import type { Row } from '$lib/content';
 
-  const rows = content.rows;
+  const rows: Row[] = content.rows;
 
   const resolve = (type: string) => {
     switch (type) {
@@ -29,6 +30,15 @@
   $: translateY = (-$camera.y).toFixed(2);
   $: scale = $camera.scale.toFixed(4);
   $: transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`;
+
+  const handleRowClick = (row: Row) => {
+    if ($focus.kind !== 'grid') return;
+    const tileIndex =
+      (row.type === 'photoGallery' || row.type === 'filmGallery') && Array.isArray(row.items) && row.items.length > 0
+        ? 0
+        : undefined;
+    void api.focusRow(row.slug, tileIndex);
+  };
 </script>
 
 <style>
@@ -57,12 +67,13 @@
     {#each rows as row, i (row.slug)}
       {@const RowComponent = resolve(row.type)}
       {#if RowComponent}
-        <svelte:component
-          this={RowComponent}
-          row={row}
+        <div
           class="row"
           style={`transform:translate3d(0, ${i * 100}vh, 0);`}
-        />
+          on:click={() => handleRowClick(row)}
+        >
+          <svelte:component this={RowComponent} row={row} />
+        </div>
       {/if}
     {/each}
   </div>
