@@ -10,8 +10,10 @@
 
   import { camera, focus, api } from '$lib/stores/camera';
   import type { Row } from '$lib/content';
+  import { spacing } from '$lib/utopia/tokens';
 
   const rows: Row[] = content.rows;
+  const tileSpacing = spacing.s5;
 
   const resolve = (type: string) => {
     switch (type) {
@@ -69,7 +71,7 @@
       {#if RowComponent}
         <div
           class="row"
-          style={`transform:translate3d(0, ${i * 100}vh, 0);`}
+          style={`transform:translate3d(0, calc(${i * 100}vh + ${i} * ${tileSpacing}), 0);`}
           on:click={() => handleRowClick(row)}
         >
           <svelte:component this={RowComponent} row={row} />

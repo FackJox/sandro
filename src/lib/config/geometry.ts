@@ -10,6 +10,7 @@ const MAX_VIEWPORT_WIDTH = 1920;
 const GRID_SCALE_CLAMP = { min: 0.11, max: 0.13, minViewport: 360, maxViewport: 1600 };
 const GUTTER_X_CLAMP = { min: 24, max: 80, minViewport: 360, maxViewport: 1680 };
 const GUTTER_Y_CLAMP = { min: 32, max: 96, minViewport: 360, maxViewport: 1680 };
+const TILE_SPACING_Y_CLAMP = { min: 32, max: 48, minViewport: 360, maxViewport: 1440 };
 
 type ClampConfig = {
   min: number;
@@ -73,10 +74,11 @@ const computeTileSize = (viewport: Viewport): TileSize => ({
 
 const computeTileSpacing = (viewport: Viewport) => {
   const { w, h } = computeTileSize(viewport);
-  const { gx, gy } = computeGutters(viewport);
-  // Note: Tiles are stacked at i*100vh in DOM (no vertical gutters)
-  // Only horizontal gutters apply for multi-column layouts
-  return { x: w + gx, y: h };
+  const { gx } = computeGutters(viewport);
+  const ty = responsiveClampInternal(TILE_SPACING_Y_CLAMP, viewport);
+  // Tiles are stacked vertically with fluid spacing between them
+  // Horizontal gutters apply for multi-column layouts
+  return { x: w + gx, y: h + ty };
 };
 
 const computeTileOrigin = (col: number, row: number, viewport: Viewport) => {
@@ -156,9 +158,10 @@ type GridShape = { columns: number; rows: number };
 const computeGridSize = (grid: GridShape, viewport: Viewport) => {
   const { w, h } = computeTileSize(viewport);
   const { gx } = computeGutters(viewport);
-  // Note: Tiles are stacked vertically without gutters in DOM
+  const ty = responsiveClampInternal(TILE_SPACING_Y_CLAMP, viewport);
+  // Tiles are stacked vertically with spacing, and horizontally with gutters
   const width = grid.columns > 0 ? grid.columns * w + Math.max(0, grid.columns - 1) * gx : 0;
-  const height = grid.rows > 0 ? grid.rows * h : 0;
+  const height = grid.rows > 0 ? grid.rows * h + Math.max(0, grid.rows - 1) * ty : 0;
   return { width, height };
 };
 
