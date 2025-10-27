@@ -88,6 +88,33 @@ describe('centering helpers', () => {
     expect(gridCamera.x).toBeLessThan(size.width);
     expect(gridCamera.y).toBeLessThan(size.height);
   });
+
+  it('allows anchoring the grid to a specific tile', () => {
+    const shape = { columns: 3, rows: 2 };
+    const anchor = tileSpacing(MID_VIEWPORT);
+    const anchorPoint = {
+      x: anchor.x * 2 + MID_VIEWPORT.vw / 2,
+      y: anchor.y * 1 + MID_VIEWPORT.vh / 2
+    };
+    const anchoredCamera = centerGrid(shape, MID_VIEWPORT, { anchor: anchorPoint });
+    const scale = gridScale(MID_VIEWPORT);
+    const halfWidth = MID_VIEWPORT.vw / (scale * 2);
+    const halfHeight = MID_VIEWPORT.vh / (scale * 2);
+    const { width, height } = gridSize(shape, MID_VIEWPORT);
+    const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+    const maxX = Math.max(0, width - MID_VIEWPORT.vw / scale);
+    const maxY = Math.max(0, height - MID_VIEWPORT.vh / scale);
+
+    expect(anchoredCamera.scale).toBeCloseTo(scale, 5);
+    expect(anchoredCamera.x).toBeCloseTo(
+      clamp(anchorPoint.x - halfWidth, 0, maxX),
+      5
+    );
+    expect(anchoredCamera.y).toBeCloseTo(
+      clamp(anchorPoint.y - halfHeight, 0, maxY),
+      5
+    );
+  });
 });
 
 describe('SSR fallback', () => {

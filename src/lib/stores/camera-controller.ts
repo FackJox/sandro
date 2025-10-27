@@ -1,4 +1,10 @@
-import { centerGrid, centerRow, centerTile, type CameraState } from '$lib/config/geometry';
+import {
+  centerGrid,
+  centerRow,
+  centerTile,
+  getViewport,
+  type CameraState
+} from '$lib/config/geometry';
 import type { Row } from '$lib/content';
 import type { MotionConfig } from '$lib/animation/motion';
 
@@ -105,16 +111,54 @@ export const commandsEqual = (a: CameraCommand, b: CameraCommand) => {
   return false;
 };
 
+type ResolveOptions = {
+  previousFocus?: FocusState;
+};
+
+const cameraCenterPoint = (camera: CameraState, viewport: { vw: number; vh: number }) => ({
+  x: camera.x + viewport.vw / (camera.scale * 2),
+  y: camera.y + viewport.vh / (camera.scale * 2)
+});
+
+const gridAnchorFromFocus = (
+  focus: FocusState,
+  config: ControllerConfig
+): { x: number; y: number } | null => {
+  if (focus.kind === 'grid') {
+    return null;
+  }
+  const rowIndex = findRowIndex(config.rows, focus.rowSlug);
+  if (rowIndex === -1) {
+    return null;
+  }
+  const viewport = getViewport(config.viewport);
+  if (focus.kind === 'row') {
+    const camera = centerRow(rowIndex, { tileIndex: focus.tileIndex }, config.viewport);
+    return cameraCenterPoint(camera, viewport);
+  }
+  const row = config.rows[rowIndex];
+  const col = resolveTileIndex(row, { tileSlug: focus.tileSlug, tileIndex: focus.tileIndex });
+  const camera = centerTile(col, rowIndex, config.viewport);
+  return cameraCenterPoint(camera, viewport);
+};
+
 const resolveCommand = (
   command: CameraCommand,
-  config: ControllerConfig
+  config: ControllerConfig,
+  options: ResolveOptions = {}
 ): { focus: FocusState; camera: CameraState } => {
   switch (command.type) {
-    case 'zoomOutToGrid':
+    case 'zoomOutToGrid': {
+      const anchor = options.previousFocus
+        ? gridAnchorFromFocus(options.previousFocus, config)
+        : null;
       return {
         focus: { kind: 'grid' },
-        camera: centerGrid(config.grid, config.viewport)
+        camera: anchor
+          ? centerGrid(config.grid, config.viewport, { anchor })
+          : centerGrid(config.grid, config.viewport)
       };
+    }
     case 'focusRow': {
       const rowIndex = findRowIndex(config.rows, command.rowSlug);
       const focus: FocusState = {
@@ -191,7 +235,7 @@ export const createCameraController = (
   };
 
   const initialFocus = initial?.focus ?? DEFAULT_FOCUS;
-  const resolvedInitial = resolveCommand(commandFromFocus(initialFocus), config);
+const resolvedInitial = resolveCommand(commandFromFocus(initialFocus), config);
 
   let state: ControllerState = {
     focus: cloneFocus(resolvedInitial.focus),
@@ -215,7 +259,7 @@ export const createCameraController = (
     activeCommand = command;
 
     const fromState = cloneState(state);
-    const resolved = resolveCommand(command, config);
+    const resolved = resolveCommand(command, config, { previousFocus: fromState.focus });
     const toState: ControllerState = {
       focus: resolved.focus,
       camera: resolved.camera,

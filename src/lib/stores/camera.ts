@@ -10,7 +10,7 @@ import {
 } from './camera-controller';
 import type { CameraState } from '$lib/config/geometry';
 
-const GRID_COLUMNS = 3;
+const GRID_COLUMNS = 1;
 const GRID_DIMENSIONS = {
   columns: GRID_COLUMNS,
   rows: Math.max(1, Math.ceil(rows.length / GRID_COLUMNS))

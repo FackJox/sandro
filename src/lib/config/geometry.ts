@@ -7,7 +7,7 @@ const DEFAULT_VIEWPORT: Viewport = { vw: 1440, vh: 900 };
 const MIN_VIEWPORT_WIDTH = 360;
 const MAX_VIEWPORT_WIDTH = 1920;
 
-const GRID_SCALE_CLAMP = { min: 0.28, max: 0.42, minViewport: 360, maxViewport: 1600 };
+const GRID_SCALE_CLAMP = { min: 0.11, max: 0.13, minViewport: 360, maxViewport: 1600 };
 const GUTTER_X_CLAMP = { min: 24, max: 80, minViewport: 360, maxViewport: 1680 };
 const GUTTER_Y_CLAMP = { min: 32, max: 96, minViewport: 360, maxViewport: 1680 };
 
@@ -200,10 +200,68 @@ export const centerRow = (
 /**
  * Camera position that frames the entire grid while maintaining aspect ratio.
  */
-export const centerGrid = (grid: GridShape, override?: Partial<Viewport>): CameraState => {
+const clamp = (value: number, min: number, max: number) => {
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
+};
+
+export const centerGrid = (
+  grid: GridShape,
+  override?: Partial<Viewport>,
+  options: { anchor?: { x: number; y: number } } = {}
+): CameraState => {
   const viewport = resolveViewport(override);
-  const { width, height } = computeGridSize(grid, viewport);
-  const center = { x: width / 2, y: height / 2 };
   const scale = gridScale(viewport);
-  return centerFromTarget(center, scale, viewport);
+  const { width, height } = computeGridSize(grid, viewport);
+
+  if (!options.anchor) {
+    const center = { x: width / 2, y: height / 2 };
+    return centerFromTarget(center, scale, viewport);
+  }
+
+  const anchor = {
+    x: clamp(options.anchor.x, 0, width),
+    y: clamp(options.anchor.y, 0, height)
+  };
+  const halfWidth = viewport.vw / (scale * 2);
+  const halfHeight = viewport.vh / (scale * 2);
+
+  // When grid is smaller than viewport, center it (allow negative camera positions)
+  // When grid is larger than viewport, clamp to prevent scrolling past edges
+  const visibleWidth = halfWidth * 2;
+  const visibleHeight = halfHeight * 2;
+
+  let x: number;
+  let y: number;
+
+  // Calculate scaled dimensions (transform translate happens in screen-space after scaling)
+  const scaledWidth = width * scale;
+  const scaledHeight = height * scale;
+
+  if (scaledWidth < viewport.vw) {
+    // Grid narrower than viewport - center it
+    const screenMargin = (viewport.vw - scaledWidth) / 2;
+    x = -screenMargin;  // camera.x such that -camera.x = screenMargin in transform
+  } else {
+    // Grid wider than viewport - clamp to edges
+    const maxX = width - visibleWidth;
+    x = clamp(anchor.x - halfWidth, 0, maxX);
+  }
+
+  if (scaledHeight < viewport.vh) {
+    // Grid shorter than viewport - center the grid itself (not the anchor)
+    // Center the middle tile at viewport center
+    const tileHeight = viewport.vh;
+    const middleTileRow = (grid.rows - 1) / 2;
+    const middleTileCenterY = middleTileRow * tileHeight + tileHeight / 2;
+    const viewportCenterY = viewport.vh / 2;
+    y = middleTileCenterY * scale - viewportCenterY;
+  } else {
+    // Grid taller than viewport - use anchor-based positioning
+    const maxY = height - visibleHeight;
+    y = clamp(anchor.y - halfHeight, 0, maxY);
+  }
+
+  return { x, y, scale };
 };
