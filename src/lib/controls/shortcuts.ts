@@ -8,7 +8,7 @@ import {
   type FocusState
 } from '$lib/stores/camera-controller';
 
-const GRID_COLUMNS = 3;
+const GRID_COLUMNS = 1;
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 type GalleryRow = Extract<Row, { type: 'photoGallery' | 'filmGallery' }>;

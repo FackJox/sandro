@@ -74,7 +74,9 @@ const computeTileSize = (viewport: Viewport): TileSize => ({
 const computeTileSpacing = (viewport: Viewport) => {
   const { w, h } = computeTileSize(viewport);
   const { gx, gy } = computeGutters(viewport);
-  return { x: w + gx, y: h + gy };
+  // Note: Tiles are stacked at i*100vh in DOM (no vertical gutters)
+  // Only horizontal gutters apply for multi-column layouts
+  return { x: w + gx, y: h };
 };
 
 const computeTileOrigin = (col: number, row: number, viewport: Viewport) => {
@@ -153,9 +155,10 @@ type GridShape = { columns: number; rows: number };
 
 const computeGridSize = (grid: GridShape, viewport: Viewport) => {
   const { w, h } = computeTileSize(viewport);
-  const { gx, gy } = computeGutters(viewport);
+  const { gx } = computeGutters(viewport);
+  // Note: Tiles are stacked vertically without gutters in DOM
   const width = grid.columns > 0 ? grid.columns * w + Math.max(0, grid.columns - 1) * gx : 0;
-  const height = grid.rows > 0 ? grid.rows * h + Math.max(0, grid.rows - 1) * gy : 0;
+  const height = grid.rows > 0 ? grid.rows * h : 0;
   return { width, height };
 };
 
