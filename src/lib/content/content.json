@@ -15,11 +15,27 @@
     {
       "type": "about",
       "slug": "about",
-      "panels": [
-        { "kind": "text", "id": "bio-1" },
-        { "kind": "media", "src": "/images/about/portrait.jpg", "alt": "Portrait" },
-        { "kind": "text", "id": "bio-2" },
-        { "kind": "media", "src": "/images/about/secondary.jpg", "alt": "Secondary" }
+      "items": [
+        {
+          "slug": "tile-1",
+          "content": "Over the past decade I've documented some of the biggest stories from the world of high altitude mountaineering. I stood on the highest peak in Afghanistan, Mt Noshaq as the first Afghan woman summited and the highest peak in Pakistan, K2 as the first Pakistani woman summited. I filmed Nirmal Purja as he set a blazing speed record on the 14 8,000ers and filmed Kristin Harila as she smashed it."
+        },
+        {
+          "slug": "tile-2",
+          "content": "A winding path brought me to the mountains. After dropping out of uni I spent 3 years in Birmingham filming raves, music videos and weddings. Wanting to see more of the world I joined the British army reserve and soon the commando training combined with my passion for story telling provided opportunities to do just that. I filmed army expeds to Dhaulagiri in 2016 and Everest in 2017, began building a basecamp network and haven't really stopped carrying cameras up mountains since."
+        },
+        {
+          "slug": "tile-3",
+          "content": "With feeling and fortitude I have the experience to bring human stories from the world's most inhumane corners. I believe deeply in representation and hope the projects I've worked on show people what's possible when you look up and believe."
+        },
+        {
+          "slug": "tile-4",
+          "content": "Stories from the mountains and the people in between are slowly being collected on my Youtube channel.",
+          "link": {
+            "text": "Youtube channel.",
+            "url": "http://www.youtube.com/@SandroGH5"
+          }
+        }
       ]
     },
     { "type": "hero", "slug": "hero" },
