@@ -8,7 +8,27 @@ export const clamp = (minPx: number, vwMin: number, vwMax: number, maxPx: number
 };
 
 export const type = {
-  base: clamp(15, viewport.min, viewport.max, 18)
+  bodySmall: clamp(13, viewport.min, viewport.max, 15),
+  body: clamp(15, viewport.min, viewport.max, 18),
+  bodyLarge: clamp(17, viewport.min, viewport.max, 21),
+  h3: clamp(20, viewport.min, viewport.max, 28),
+  h2: clamp(25, viewport.min, viewport.max, 36),
+  h1: clamp(32, viewport.min, viewport.max, 48),
+  display: clamp(40, viewport.min, viewport.max, 72)
+};
+
+export const lineHeights = {
+  tight: 1.2,
+  normal: 1.5,
+  loose: 1.8
+};
+
+export const weights = {
+  light: 200,
+  regular: 400,
+  medium: 500,
+  semibold: 600,
+  bold: 700
 };
 
 export const spacing = {
