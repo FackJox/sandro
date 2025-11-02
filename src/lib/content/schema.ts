@@ -38,6 +38,17 @@ const aboutPanelSchema = z.discriminatedUnion('kind', [
     .passthrough()
 ]);
 
+const aboutItemSchema = z.object({
+  slug: nonEmptyString,
+  content: nonEmptyString,
+  link: z
+    .object({
+      text: nonEmptyString,
+      url: urlSchema
+    })
+    .optional()
+});
+
 const baseRow = z.object({
   slug: slugSchema,
   title: nonEmptyString.optional()
@@ -53,7 +64,7 @@ const contactRowSchema = baseRow.extend({
 
 const aboutRowSchema = baseRow.extend({
   type: z.literal('about'),
-  panels: z.array(aboutPanelSchema).min(1)
+  items: z.array(aboutItemSchema).min(1)
 });
 
 const showreelRowSchema = baseRow.extend({
