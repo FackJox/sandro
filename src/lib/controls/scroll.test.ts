@@ -1,4 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { writable, type Writable } from 'svelte/store';
 
 type MockFocusState =
@@ -7,16 +8,22 @@ type MockFocusState =
   | { kind: 'tile'; rowSlug: string; tileSlug: string; tileIndex?: number };
 
 const focusStore: Writable<MockFocusState> = writable({ kind: 'row', rowSlug: 'hero' });
-const zoomOutMock = vi.fn<[], Promise<void>>(() => Promise.resolve());
-const focusRowMock = vi.fn<[], Promise<void>>(() => Promise.resolve());
-const focusTileMock = vi.fn<[], Promise<void>>(() => Promise.resolve());
+const zoomOutMock: Mock<[], Promise<void>> = vi.fn<[], Promise<void>>(async () => {});
+const focusRowMock: Mock<[string, number?], Promise<void>> = vi.fn<
+  [string, number?],
+  Promise<void>
+>(async (_rowSlug: string, _tileIndex?: number) => {});
+const focusTileMock: Mock<[string, string, number?], Promise<void>> = vi.fn<
+  [string, string, number?],
+  Promise<void>
+>(async (_rowSlug: string, _tileSlug: string, _tileIndex?: number) => {});
 
 vi.mock('$lib/stores/camera', () => {
   return {
     api: {
       zoomOutToGrid: zoomOutMock,
-      focusRow: (...args: any[]) => focusRowMock(...args),
-      focusTile: (...args: any[]) => focusTileMock(...args)
+      focusRow: focusRowMock,
+      focusTile: focusTileMock
     },
     focus: focusStore
   };

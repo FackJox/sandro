@@ -1,10 +1,16 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Canvas, T } from '@threlte/core';
-  export let row: any;
+  import type { Row } from '$lib/content';
+
+  type PhotoGalleryRow = Extract<Row, { type: 'photoGallery' }>;
+
+  export let row: PhotoGalleryRow;
   // TODO: implement masonry layout, pan/zoom, hit-testing
 
   let viewport = { width: 1920, height: 1080 };
+  $: photoCount = row.items.length;
+  $: ariaLabel = `${row.title ?? row.slug.toUpperCase()} gallery with ${photoCount} photo${photoCount === 1 ? '' : 's'}`;
 
   onMount(() => {
     const update = () => {
@@ -19,16 +25,25 @@
   });
 </script>
 
-<Canvas>
-  <T.OrthographicCamera
-    makeDefault
-    left={0}
-    right={viewport.width}
-    top={0}
-    bottom={viewport.height}
-    near={-1000}
-    far={1000}
-    position={[0, 0, 10]}
-  />
-  <!-- Gallery content goes here -->
-</Canvas>
+<div class="canvas-wrapper" aria-label={ariaLabel} data-row={row.slug}>
+  <Canvas>
+    <T.OrthographicCamera
+      makeDefault
+      left={0}
+      right={viewport.width}
+      top={0}
+      bottom={viewport.height}
+      near={-1000}
+      far={1000}
+      position={[0, 0, 10]}
+    />
+    <!-- Gallery content goes here -->
+  </Canvas>
+</div>
+
+<style>
+  .canvas-wrapper {
+    position: absolute;
+    inset: 0;
+  }
+</style>

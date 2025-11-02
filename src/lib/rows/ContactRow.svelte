@@ -1,5 +1,11 @@
 <script lang="ts">
-  export let row: any;
+  import type { Row } from '$lib/content';
+
+  type ContactRowRow = Extract<Row, { type: 'contact' }>;
+
+  export let row: ContactRowRow;
+
+  const heading = row.title ?? row.slug.toUpperCase();
 
   const socials = [
     {
@@ -20,7 +26,7 @@
   ];
 </script>
 
-<div class="contact-tile" role="region" aria-labelledby="contact-title">
+<div class="contact-tile" role="region" aria-labelledby="contact-title" data-row={row.slug}>
   <div class="background">
     <img
       src="/37d07c_f35c49f1cc5d4e9f94afd63a3d47ae12f000.avif"
@@ -31,7 +37,7 @@
   <div class="overlay" aria-hidden="true"></div>
 
   <div class="content">
-    <h2 id="contact-title">CONTACT</h2>
+    <h2 id="contact-title">{heading}</h2>
     <p class="lead">If you have a story to tell please get in touch.</p>
     <a class="contact-link phone" href="tel:+447880352909">+44 7880 352909</a>
     <a class="contact-link email" href="mailto:sandro.gromen-hayes@live.com">

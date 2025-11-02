@@ -19,7 +19,7 @@ export type CameraCommand =
   | { type: 'focusTile'; rowSlug: string; tileSlug: string; tileIndex?: number };
 
 export type ControllerConfig = {
-  rows: Row[];
+  rows: ReadonlyArray<Row>;
   grid: { columns: number; rows: number };
   viewport?: { vw: number; vh: number };
 };
@@ -67,7 +67,8 @@ const cloneState = (state: ControllerState): ControllerState => ({
   queue: state.queue.map(cloneCommand)
 });
 
-const findRowIndex = (rows: Row[], slug: string) => rows.findIndex((row) => row.slug === slug);
+const findRowIndex = (rows: ReadonlyArray<Row>, slug: string) =>
+  rows.findIndex((row) => row.slug === slug);
 
 const resolveTileIndex = (row: Row, command: { tileSlug: string; tileIndex?: number }) => {
   if (command.tileIndex != null) return command.tileIndex;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import content from '$lib/content/content.json';
+  import { rows as contentRows } from '$lib/content';
   import HeroRow from '$lib/rows/HeroRow.svelte';
   import AboutRow from '$lib/rows/AboutRow.svelte';
   import ShowreelRow from '$lib/rows/ShowreelRow.svelte';
@@ -12,7 +12,7 @@
   import type { Row } from '$lib/content';
   import { spacing } from '$lib/utopia/tokens';
 
-  const rows: Row[] = content.rows;
+  const rows: ReadonlyArray<Row> = contentRows;
   const tileSpacing = spacing.s5;
 
   const resolve = (type: string) => {
@@ -33,13 +33,23 @@
   $: scale = $camera.scale.toFixed(4);
   $: transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`;
 
-  const handleRowClick = (row: Row) => {
+  const activateRow = (row: Row) => {
     if ($focus.kind !== 'grid') return;
     const tileIndex =
       (row.type === 'photoGallery' || row.type === 'filmGallery') && Array.isArray(row.items) && row.items.length > 0
         ? 0
         : undefined;
     void api.focusRow(row.slug, tileIndex);
+  };
+
+  const handleRowClick = (row: Row) => {
+    activateRow(row);
+  };
+
+  const handleRowKeyDown = (row: Row, event: KeyboardEvent) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    activateRow(row);
   };
 </script>
 
@@ -73,6 +83,10 @@
           class="row"
           style={`transform:translate3d(0, calc(${i * 100}vh + ${i} * ${tileSpacing}), 0);`}
           on:click={() => handleRowClick(row)}
+          on:keydown={(event) => handleRowKeyDown(row, event)}
+          role="button"
+          tabindex="0"
+          aria-label={`Focus ${row.title ?? row.slug}`}
         >
           <svelte:component this={RowComponent} row={row} />
         </div>

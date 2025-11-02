@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 declare global {
   interface Window {
     __cameraApi?: { zoomOutToGrid?: () => unknown };
+    __getContactCtaVisible?: () => boolean | undefined;
   }
 }
 
@@ -24,9 +25,14 @@ test.describe('navigation flows', () => {
     await expect(cta).toBeHidden();
 
     await page.click('body', { position: { x: 5, y: 5 } });
-    await page.evaluate(async () => {
+    const cameraApiType = await page.evaluate(async () => {
+      const type = typeof window.__cameraApi;
       await window.__cameraApi?.zoomOutToGrid?.();
+      return type;
     });
+    console.log('camera api typeof:', cameraApiType);
+    const ctaStoreValue = await page.evaluate(() => window.__getContactCtaVisible?.());
+    console.log('CTA store value after zoom out:', ctaStoreValue);
     await expect(cta).toBeVisible();
 
     await cta.click();

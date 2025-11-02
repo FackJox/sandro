@@ -1,18 +1,27 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { defaultMotion } from '$lib/animation/motion';
+
+type TimelineMockInstance = {
+  to: Mock<[Record<string, number>, Record<string, any>], TimelineMockInstance>;
+  eventCallback: Mock<['onComplete' | 'onInterrupt', () => void], TimelineMockInstance>;
+  play: Mock<[], TimelineMockInstance>;
+  kill: Mock<[], void>;
+};
 
 const createTimelineMock = () => {
   const calls: Array<{ vars: Record<string, any> }> = [];
   let onUpdate: (() => void) | undefined;
   let onComplete: (() => void) | undefined;
 
-  const instance = {
-    to: vi.fn((_target: Record<string, number>, vars: Record<string, any>) => {
+  const instance: TimelineMockInstance = {
+    to: vi.fn((_target, vars) => {
       calls.push({ vars });
-      onUpdate = typeof vars.onUpdate === 'function' ? vars.onUpdate : undefined;
+      const maybeOnUpdate = vars.onUpdate;
+      onUpdate = typeof maybeOnUpdate === 'function' ? maybeOnUpdate : undefined;
       return instance;
     }),
-    eventCallback: vi.fn((event: 'onComplete' | 'onInterrupt', cb: () => void) => {
+    eventCallback: vi.fn((event, cb) => {
       if (event === 'onComplete') onComplete = cb;
       return instance;
     }),

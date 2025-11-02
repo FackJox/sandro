@@ -4,6 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "sync": "svelte-kit sync",
+    "predev": "npm run sync",
+    "prebuild": "npm run sync",
+    "precheck": "npm run sync",
+    "prelint": "npm run sync",
+    "pretest:unit": "npm run sync",
+    "pretest:e2e": "npm run sync",
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
@@ -11,7 +18,8 @@
     "lint": "svelte-check --tsconfig ./tsconfig.json",
     "test:unit": "node scripts/run-vitest.mjs",
     "test:e2e": "playwright test",
-    "test:ci": "yarn lint && yarn test:unit --runInBand && yarn test:e2e --reporter=list"
+    "test": "pnpm run lint && pnpm run test:unit && pnpm run test:e2e",
+    "test:ci": "pnpm run lint && pnpm run test:unit && pnpm run test:e2e --reporter=list"
   },
   "dependencies": {
     "@sveltejs/kit": "^2.5.0",

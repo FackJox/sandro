@@ -26,7 +26,7 @@ export default defineConfig({
     }
   ],
   webServer: {
-    command: `yarn dev --host ${HOST} --port ${PORT}`,
+    command: `pnpm dev --host ${HOST} --port ${PORT}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     stdout: 'pipe',

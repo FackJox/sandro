@@ -1,5 +1,11 @@
 <script lang="ts">
-  export let row: any;
+  import type { Row } from '$lib/content';
+
+  type HeroRowRow = Extract<Row, { type: 'hero' }>;
+
+  export let row: HeroRowRow;
+
+  const rowLabel = row.title ?? row.slug.toUpperCase();
 
   const logos = [
     { src: '/images/logos/osprey_logo.avif', alt: 'Osprey' },
@@ -8,7 +14,10 @@
     { src: '/images/logos/netflix_logo.avif', alt: 'Netflix' },
     { src: '/images/logos/bbc_logo.avif', alt: 'BBC' },
     { src: '/images/logos/norface_logo.avif', alt: 'The North Face' },
-    { src: '/images/logos/blackcrows_logo.avif', alt: 'Black Crows' }
+    { src: '/images/logos/blackcrows_logo.avif', alt: 'Black Crows' },
+    { src: '/images/logos/berghaus_logo.avif', alt: 'Berghaus' },
+    { src: '/images/logos/fp_logo.avif', alt: 'FP' },
+    { src: '/images/logos/scarpa_logo.avif', alt: 'Scarpa' }
   ];
 </script>
 
@@ -136,7 +145,7 @@
   }
 </style>
 
-<div class="hero" role="region" aria-label="Hero">
+<div class="hero" role="region" aria-label={rowLabel} data-row={row.slug}>
   <div class="background">
     <img
       src="/images/hero/hero_image.avif"

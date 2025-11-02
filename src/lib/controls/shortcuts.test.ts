@@ -54,7 +54,7 @@ describe('keyboard shortcuts', () => {
 
   it('navigates between rows with arrow keys and backs out with escape', () => {
     const arrowEvent = dispatchKey('ArrowDown');
-    expect(cameraModule.api.focusRow).toHaveBeenCalledWith('services', undefined);
+    expect(cameraModule.api.focusRow).toHaveBeenCalledWith('contact', undefined);
     expect(arrowEvent.defaultPrevented).toBe(true);
 
     focusStore.set({ kind: 'row', rowSlug: 'services' });

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import {
   commandFromFocus,
   createCameraController,
@@ -8,7 +9,7 @@ import {
 import type { FocusState } from './camera-controller';
 import type { Row } from '$lib/content';
 import { defaultMotion } from '$lib/animation/motion';
-import { centerRow, centerTile, getViewport, gridScale, gridSize } from '$lib/config/geometry';
+import { centerGrid, centerRow, centerTile, getViewport } from '$lib/config/geometry';
 
 const heroRow: Row = { type: 'hero', slug: 'hero' };
 const photoRow: Row = {
@@ -43,19 +44,30 @@ const controllerConfig = {
   grid: { columns: 3, rows: 2 }
 } as const;
 
+type TimelineMockInstance = {
+  to: Mock<[Record<string, number>, Record<string, any>], TimelineMockInstance>;
+  eventCallback: Mock<
+    ['onUpdate' | 'onComplete' | 'onInterrupt', () => void],
+    TimelineMockInstance
+  >;
+  play: Mock<[], TimelineMockInstance>;
+  kill: Mock<[], void>;
+};
+
 const createTimelineMock = () => {
   const calls: Array<{ target: Record<string, number>; vars: Record<string, any> }> = [];
   let onUpdate: (() => void) | undefined;
   let onComplete: (() => void) | undefined;
   let onInterrupt: (() => void) | undefined;
 
-  const instance = {
-    to: vi.fn((target: Record<string, number>, vars: Record<string, any>) => {
+  const instance: TimelineMockInstance = {
+    to: vi.fn((target, vars) => {
       calls.push({ target, vars });
-      onUpdate = typeof vars.onUpdate === 'function' ? vars.onUpdate : undefined;
+      const maybeOnUpdate = vars.onUpdate;
+      onUpdate = typeof maybeOnUpdate === 'function' ? maybeOnUpdate : undefined;
       return instance;
     }),
-    eventCallback: vi.fn((event: 'onUpdate' | 'onComplete' | 'onInterrupt', cb: () => void) => {
+    eventCallback: vi.fn((event, cb) => {
       if (event === 'onComplete') onComplete = cb;
       if (event === 'onInterrupt') onInterrupt = cb;
       return instance;
@@ -181,14 +193,6 @@ describe('camera controller timelines', () => {
 
 describe('zoom out anchoring', () => {
   const viewport = getViewport();
-  const scale = gridScale(viewport);
-  const halfWidth = viewport.vw / (scale * 2);
-  const halfHeight = viewport.vh / (scale * 2);
-  const clamp = (value: number, min: number, max: number) =>
-    Math.min(max, Math.max(min, value));
-  const { width, height } = gridSize(controllerConfig.grid, viewport);
-  const maxX = Math.max(0, width - viewport.vw / scale);
-  const maxY = Math.max(0, height - viewport.vh / scale);
 
   it('centers the previously focused row when zooming out', async () => {
     const { deps } = createDeps({ immediate: true });
@@ -205,14 +209,10 @@ describe('zoom out anchoring', () => {
       x: focusCamera.x + viewport.vw / (focusCamera.scale * 2),
       y: focusCamera.y + viewport.vh / (focusCamera.scale * 2)
     };
-    expect(transition!.to.camera.x).toBeCloseTo(
-      clamp(focusCenter.x - halfWidth, 0, maxX),
-      5
-    );
-    expect(transition!.to.camera.y).toBeCloseTo(
-      clamp(focusCenter.y - halfHeight, 0, maxY),
-      5
-    );
+    const expected = centerGrid(controllerConfig.grid, viewport, { anchor: focusCenter });
+    expect(transition!.to.camera.scale).toBeCloseTo(expected.scale, 5);
+    expect(transition!.to.camera.x).toBeCloseTo(expected.x, 5);
+    expect(transition!.to.camera.y).toBeCloseTo(expected.y, 5);
   });
 
   it('uses tile slug to maintain focus when zooming out from a tile', async () => {
@@ -237,14 +237,10 @@ describe('zoom out anchoring', () => {
       x: focusCamera.x + viewport.vw / (focusCamera.scale * 2),
       y: focusCamera.y + viewport.vh / (focusCamera.scale * 2)
     };
-    expect(transition!.to.camera.x).toBeCloseTo(
-      clamp(focusCenter.x - halfWidth, 0, maxX),
-      5
-    );
-    expect(transition!.to.camera.y).toBeCloseTo(
-      clamp(focusCenter.y - halfHeight, 0, maxY),
-      5
-    );
+    const expected = centerGrid(controllerConfig.grid, viewport, { anchor: focusCenter });
+    expect(transition!.to.camera.scale).toBeCloseTo(expected.scale, 5);
+    expect(transition!.to.camera.x).toBeCloseTo(expected.x, 5);
+    expect(transition!.to.camera.y).toBeCloseTo(expected.y, 5);
   });
 
   it('centers rows that live in later grid rows', async () => {
@@ -266,20 +262,10 @@ describe('zoom out anchoring', () => {
       x: focusCamera.x + viewport.vw / (focusCamera.scale * 2),
       y: focusCamera.y + viewport.vh / (focusCamera.scale * 2)
     };
-    const { width: expandedWidth, height: expandedHeight } = gridSize(
-      expandedConfig.grid,
-      viewport
-    );
-    const expandedMaxX = Math.max(0, expandedWidth - viewport.vw / scale);
-    const expandedMaxY = Math.max(0, expandedHeight - viewport.vh / scale);
-    expect(transition!.to.camera.x).toBeCloseTo(
-      clamp(focusCenter.x - halfWidth, 0, expandedMaxX),
-      5
-    );
-    expect(transition!.to.camera.y).toBeCloseTo(
-      clamp(focusCenter.y - halfHeight, 0, expandedMaxY),
-      5
-    );
+    const expected = centerGrid(expandedConfig.grid, viewport, { anchor: focusCenter });
+    expect(transition!.to.camera.scale).toBeCloseTo(expected.scale, 5);
+    expect(transition!.to.camera.x).toBeCloseTo(expected.x, 5);
+    expect(transition!.to.camera.y).toBeCloseTo(expected.y, 5);
   });
 });
 describe('command helpers', () => {

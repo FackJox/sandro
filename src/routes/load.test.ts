@@ -31,7 +31,7 @@ const getSampleFilmSlug = () => {
 
 describe('route load functions', () => {
   it('root load returns hero row target', () => {
-    const result = rootLoad();
+    const result = rootLoad({} as any);
 
     expect(result).toEqual({
       target: { kind: 'row', rowSlug: 'hero' }

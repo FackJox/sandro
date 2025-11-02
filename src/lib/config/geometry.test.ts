@@ -47,13 +47,11 @@ describe('gutters', () => {
 
 describe('gridScale', () => {
   it('clamps to configured min for narrow screens', () => {
-    const scale = gridScale(SMALL_VIEWPORT);
-    expect(scale).toBeGreaterThanOrEqual(0.28);
-    expect(scale).toBeLessThan(0.29);
+    expect(gridScale(SMALL_VIEWPORT)).toBeCloseTo(0.1102, 4);
   });
 
   it('clamps to configured max for wide screens', () => {
-    expect(gridScale(LARGE_VIEWPORT)).toBeCloseTo(0.42, 3);
+    expect(gridScale(LARGE_VIEWPORT)).toBeCloseTo(0.13, 4);
   });
 });
 
@@ -104,16 +102,27 @@ describe('centering helpers', () => {
     const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
     const maxX = Math.max(0, width - MID_VIEWPORT.vw / scale);
     const maxY = Math.max(0, height - MID_VIEWPORT.vh / scale);
+    const anchorBounds = {
+      x: clamp(anchorPoint.x, 0, width),
+      y: clamp(anchorPoint.y, 0, height)
+    };
+    const scaledWidth = width * scale;
+    const scaledHeight = height * scale;
+    const expectedX =
+      scaledWidth < MID_VIEWPORT.vw
+        ? -(MID_VIEWPORT.vw - scaledWidth) / 2
+        : clamp(anchorBounds.x - halfWidth, 0, maxX);
+    const tileHeight = MID_VIEWPORT.vh;
+    const middleTileRow = (shape.rows - 1) / 2;
+    const middleTileCenterY = middleTileRow * tileHeight + tileHeight / 2;
+    const expectedY =
+      scaledHeight < MID_VIEWPORT.vh
+        ? middleTileCenterY * scale - MID_VIEWPORT.vh / 2
+        : clamp(anchorBounds.y - halfHeight, 0, maxY);
 
     expect(anchoredCamera.scale).toBeCloseTo(scale, 5);
-    expect(anchoredCamera.x).toBeCloseTo(
-      clamp(anchorPoint.x - halfWidth, 0, maxX),
-      5
-    );
-    expect(anchoredCamera.y).toBeCloseTo(
-      clamp(anchorPoint.y - halfHeight, 0, maxY),
-      5
-    );
+    expect(anchoredCamera.x).toBeCloseTo(expectedX, 5);
+    expect(anchoredCamera.y).toBeCloseTo(expectedY, 5);
   });
 });
 

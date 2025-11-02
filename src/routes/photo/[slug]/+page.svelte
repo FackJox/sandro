@@ -1,3 +1,1 @@
-<script lang="ts">
-  export let data;
-</script>
+<!-- Intentional placeholder page. Content rendered via root layout. -->

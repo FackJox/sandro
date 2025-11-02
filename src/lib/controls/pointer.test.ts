@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { SpyInstance } from 'vitest';
 import { getActivePointers, initPointer, subscribePointers, type PointerBatch } from './pointer';
 
 const createPointerEvent = (type: string, init: PointerEventInit & { pointerId: number }) => {
@@ -36,7 +37,7 @@ describe('pointer manager', () => {
   let root: HTMLDivElement;
   let dispose: (() => void) | undefined;
   let now = 0;
-  let nowSpy: ReturnType<typeof vi.spyOn>;
+  let nowSpy: SpyInstance<[], number>;
 
   const advance = (ms: number) => {
     now += ms;

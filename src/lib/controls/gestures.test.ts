@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Mock, SpyInstance } from 'vitest';
 import { writable, type Writable } from 'svelte/store';
 
 import type { FocusState } from '$lib/stores/camera';
@@ -20,17 +21,17 @@ const createSwipe = (overrides: Partial<SwipeIntent> = {}): SwipeIntent => ({
 
 describe('initGestures', () => {
   let focusStore: Writable<FocusState>;
-  let zoomOutMock: ReturnType<typeof vi.fn>;
-  let focusRowMock: ReturnType<typeof vi.fn>;
-  let focusTileMock: ReturnType<typeof vi.fn>;
-  let unsubscribeIntentsMock: ReturnType<typeof vi.fn>;
-  let stopGesturesMock: ReturnType<typeof vi.fn>;
+  let zoomOutMock: Mock<[], Promise<void>>;
+  let focusRowMock: Mock<[string, number?], Promise<void>>;
+  let focusTileMock: Mock<[string, string, number?], Promise<void>>;
+  let unsubscribeIntentsMock: Mock<[], void>;
+  let stopGesturesMock: Mock<[], void>;
   let intentHandler: ((intent: GestureIntent) => void) | null;
   let initGestures: InitGesturesModule['initGestures'];
   let createZoomToggle: ZoomToggleModule['createZoomToggle'];
   let toggle: ReturnType<ZoomToggleModule['createZoomToggle']> | null;
   let now = 0;
-  let nowSpy: ReturnType<typeof vi.spyOn> | null = null;
+  let nowSpy: SpyInstance<[], number> | null = null;
 
   const loadModules = async () => {
     ({ initGestures } = await import('./gestures'));
@@ -41,11 +42,11 @@ describe('initGestures', () => {
     vi.resetModules();
     intentHandler = null;
     focusStore = writable<FocusState>({ kind: 'row', rowSlug: 'hero' });
-    zoomOutMock = vi.fn(() => Promise.resolve());
-    focusRowMock = vi.fn(() => Promise.resolve());
-    focusTileMock = vi.fn(() => Promise.resolve());
-    unsubscribeIntentsMock = vi.fn();
-    stopGesturesMock = vi.fn();
+    zoomOutMock = vi.fn<[], Promise<void>>(async () => {});
+    focusRowMock = vi.fn<[string, number?], Promise<void>>(async () => {});
+    focusTileMock = vi.fn<[string, string, number?], Promise<void>>(async () => {});
+    unsubscribeIntentsMock = vi.fn<[], void>(() => {});
+    stopGesturesMock = vi.fn<[], void>(() => {});
     now = 0;
     if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
       nowSpy?.mockRestore?.();
@@ -145,10 +146,10 @@ describe('initGestures', () => {
   });
 
   it('does not trigger a restore when a second swipe happens before zoom out completes', async () => {
-    let resolveZoom: (() => void) | null = null;
+    let resolveZoom: ((value?: void | PromiseLike<void>) => void) | undefined;
     zoomOutMock.mockImplementation(
       () =>
-        new Promise<void>((resolve) => {
+        new Promise<void>((resolve: (value?: void | PromiseLike<void>) => void) => {
           resolveZoom = resolve;
         })
     );
@@ -159,7 +160,7 @@ describe('initGestures', () => {
     intentHandler?.(createSwipe());
     await Promise.resolve();
     expect(focusRowMock).not.toHaveBeenCalled();
-    resolveZoom?.();
+    resolveZoom!();
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(focusRowMock).not.toHaveBeenCalled();
   });

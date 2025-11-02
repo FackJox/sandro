@@ -2,7 +2,7 @@
   import '../app.css';
 
   import { onMount } from 'svelte';
-  import { writable } from 'svelte/store';
+  import { get, writable } from 'svelte/store';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
 
@@ -112,6 +112,7 @@
     const disposeShortcuts = initShortcuts();
     if (typeof window !== 'undefined') {
       (window as any).__cameraApi = api;
+      (window as any).__getContactCtaVisible = () => get(contactCtaVisible);
     }
     const unsubNavigateTo = navigation.subscribe(async ($nav) => {
       if ($nav) {
@@ -156,6 +157,9 @@
       if (typeof window !== 'undefined') {
         if ((window as any).__cameraApi === api) {
           delete (window as any).__cameraApi;
+        }
+        if ((window as any).__getContactCtaVisible) {
+          delete (window as any).__getContactCtaVisible;
         }
         window.removeEventListener('popstate', handlePopState);
       }
