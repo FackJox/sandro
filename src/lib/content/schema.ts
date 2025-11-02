@@ -22,22 +22,6 @@ export const filmItemSchema = z.object({
   externalUrl: urlSchema
 });
 
-const aboutPanelSchema = z.discriminatedUnion('kind', [
-  z
-    .object({
-      kind: z.literal('text'),
-      id: nonEmptyString
-    })
-    .passthrough(),
-  z
-    .object({
-      kind: z.literal('media'),
-      src: absolutePathSchema,
-      alt: nonEmptyString
-    })
-    .passthrough()
-]);
-
 const aboutItemSchema = z.object({
   slug: nonEmptyString,
   content: nonEmptyString,
@@ -151,5 +135,6 @@ export const contentSchema = z
 
 export type PhotoItem = z.infer<typeof photoItemSchema>;
 export type FilmItem = z.infer<typeof filmItemSchema>;
+export type AboutItem = z.infer<typeof aboutItemSchema>;
 export type Row = z.infer<typeof rowSchema>;
 export type Content = z.infer<typeof contentSchema>;

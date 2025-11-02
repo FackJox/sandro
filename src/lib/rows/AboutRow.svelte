@@ -7,7 +7,7 @@
   export let row: AboutRowRow;
 
   const title = row.title ?? row.slug.toUpperCase();
-  const panelCount = row.panels.length;
+  const panelCount = row.items.length;
   const subtitle = `${panelCount} panel${panelCount === 1 ? '' : 's'} planned`;
 </script>
 
