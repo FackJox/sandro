@@ -1,7 +1,6 @@
 <script lang="ts">
   import { rows as contentRows } from '$lib/content';
   import HeroRow from '$lib/rows/HeroRow.svelte';
-  import AboutRow from '$lib/rows/AboutRow.svelte';
   import ShowreelRow from '$lib/rows/ShowreelRow.svelte';
   import ServicesRow from '$lib/rows/ServicesRow.svelte';
   import ContactRow from '$lib/rows/ContactRow.svelte';
@@ -18,7 +17,7 @@
   const resolve = (type: string) => {
     switch (type) {
       case 'hero': return HeroRow;
-      case 'about': return AboutRow;
+      case 'about': return null; // About row uses individual routes, not grid
       case 'showreel': return ShowreelRow;
       case 'services': return ServicesRow;
       case 'contact': return ContactRow;
@@ -36,7 +35,7 @@
   const activateRow = (row: Row) => {
     if ($focus.kind !== 'grid') return;
     const tileIndex =
-      (row.type === 'photoGallery' || row.type === 'filmGallery') && Array.isArray(row.items) && row.items.length > 0
+      (row.type === 'photoGallery' || row.type === 'filmGallery' || row.type === 'about') && Array.isArray(row.items) && row.items.length > 0
         ? 0
         : undefined;
     void api.focusRow(row.slug, tileIndex);
