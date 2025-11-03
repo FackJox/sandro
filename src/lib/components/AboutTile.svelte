@@ -6,10 +6,24 @@
   export let link: { text: string; url: string } | undefined = undefined;
   export let position: { current: number; total: number };
 
+  // HTML escape helper to prevent XSS
+  function escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   // Parse content and replace link text with anchor tag
   function renderContent(text: string, linkConfig?: { text: string; url: string }): string {
     if (!linkConfig) return text;
-    const linkHtml = `<a href="${linkConfig.url}" target="_blank" rel="noopener noreferrer" class="link">${linkConfig.text}</a>`;
+    // Don't create link if text is empty string (no replacement possible)
+    if (linkConfig.text === '') return text;
+    const escapedUrl = escapeHtml(linkConfig.url);
+    const escapedText = escapeHtml(linkConfig.text);
+    const linkHtml = `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" class="link">${escapedText}</a>`;
     return text.replace(linkConfig.text, linkHtml);
   }
 
@@ -59,6 +73,7 @@
   class="tile"
   role="region"
   aria-label={ariaLabel}
+  data-slug={slug}
   style="
     --spacing-s6: {$theme.spacing.s6};
     --type-body: {$theme.type.body};
