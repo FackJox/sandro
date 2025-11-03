@@ -11,9 +11,9 @@ import {
 const GRID_COLUMNS = 1;
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
-type GalleryRow = Extract<Row, { type: 'photoGallery' | 'filmGallery' }>;
+type GalleryRow = Extract<Row, { type: 'photoGallery' | 'filmGallery' | 'about' }>;
 
-const galleryTypes = new Set<GalleryRow['type']>(['photoGallery', 'filmGallery']);
+const galleryTypes = new Set<GalleryRow['type']>(['photoGallery', 'filmGallery', 'about']);
 
 const getRowIndex = (slug: string) => rows.findIndex((row) => row.slug === slug);
 const getRowByIndex = (index: number) => rows[index] ?? null;
