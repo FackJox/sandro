@@ -6,6 +6,7 @@
   import ContactRow from '$lib/rows/ContactRow.svelte';
   import PhotoRow from '$lib/rows/PhotoRow.svelte';
   import FilmRow from '$lib/rows/FilmRow.svelte';
+  import AboutRow from '$lib/rows/AboutRow.svelte';
 
   import { camera, focus, api } from '$lib/stores/camera';
   import type { Row } from '$lib/content';
@@ -17,7 +18,7 @@
   const resolve = (type: string) => {
     switch (type) {
       case 'hero': return HeroRow;
-      case 'about': return null; // About row uses individual routes, not grid
+      case 'about': return AboutRow;
       case 'showreel': return ShowreelRow;
       case 'services': return ServicesRow;
       case 'contact': return ContactRow;

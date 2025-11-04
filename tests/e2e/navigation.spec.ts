@@ -7,7 +7,7 @@ declare global {
   }
 }
 
-const PATHS = ['/', '/contact', '/photo/desert-dawn', '/film/brand-film-x'];
+const PATHS = ['/', '/contact', '/photo/desert-dawn', '/film/brand-film-x', '/about', '/about/tile-1'];
 
 test.describe('navigation flows', () => {
   for (const path of PATHS) {
@@ -20,6 +20,9 @@ test.describe('navigation flows', () => {
 
   test('contact CTA animates then navigates', async ({ page }) => {
     await page.goto('/photo/desert-dawn');
+
+    // Wait for camera API to be initialized
+    await page.waitForFunction(() => typeof window.__cameraApi !== 'undefined');
 
     const cta = page.locator('.contact-cta');
     await expect(cta).toBeHidden();

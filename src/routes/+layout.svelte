@@ -122,10 +122,19 @@
     });
     const unsubscribe = page.subscribe(handlePageChange);
     const unsubscribeFocus = focus.subscribe(($focus) => {
+      console.log('[layout] focus store update', $focus);
+
+      // Handle tile navigation - update URL when focus changes to a different tile
+      if ($focus.kind === 'tile') {
+        const expectedPath = `/${$focus.rowSlug}/${$focus.tileSlug}`;
+        if (typeof window !== 'undefined' && window.location.pathname !== expectedPath) {
+          navigation.set({ to: expectedPath, replace: false });
+        }
+      }
+
       if ($focus.kind === lastFocusKind) return;
       lastFocusKind = $focus.kind;
       const isGrid = $focus.kind === 'grid';
-      console.log('[layout] focus store update', $focus);
       setCtaVisibility(isGrid);
       if (typeof window !== 'undefined') {
         if (isGrid) {

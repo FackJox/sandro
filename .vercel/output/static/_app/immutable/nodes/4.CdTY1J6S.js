@@ -1,0 +1,1 @@
+import{r as s}from"../chunks/ft-thZGf.js";import{r as l}from"../chunks/Ajekgnoe.js";function n(){var e,o;const t=l.find(i=>i.type==="about"),r=((o=(e=t==null?void 0:t.items)==null?void 0:e[0])==null?void 0:o.slug)??"tile-1";throw s(307,`/about/${r}`)}const c=Object.freeze(Object.defineProperty({__proto__:null,load:n},Symbol.toStringTag,{value:"Module"}));export{c as universal};
