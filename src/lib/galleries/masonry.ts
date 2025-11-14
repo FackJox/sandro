@@ -1,17 +1,46 @@
-export type Rect = { x: number; y: number; w: number; h: number };
+export type MasonryItem = { slug: string; aspect: number };
+export type Viewport = { vw: number; vh: number };
+export type TileRect = { slug: string; x: number; y: number; w: number; h: number };
+export type MasonryInput = {
+  items: MasonryItem[];
+  viewport: Viewport;
+  gap: number;
+  minColumnWidth: number;
+  maxColumns: number;
+};
+export type MasonryResult = { columns: number; width: number; height: number; tiles: TileRect[] };
 
-// Very small placeholder masonry function; replace with responsive algo later.
-export function masonry(count: number, colWidth: number, gap: number, cols: number): Rect[] {
-  const heights = Array(cols).fill(0) as number[];
-  const out: Rect[] = [];
-  for (let i = 0; i < count; i++) {
-    const col = heights.indexOf(Math.min(...heights));
-    const x = col * (colWidth + gap);
-    const h = colWidth * 0.75; // placeholder aspect
-    const y = heights[col];
-    out.push({ x, y, w: colWidth, h });
-    heights[col] += h + gap;
+export function masonry(config: MasonryInput): MasonryResult {
+  const { items, viewport, gap, minColumnWidth, maxColumns } = config;
+  const computedColumns = Math.floor(viewport.vw / Math.max(minColumnWidth, 1));
+  const columns = Math.max(1, Math.min(maxColumns, computedColumns || 0));
+
+  if (items.length === 0) {
+    return { columns, width: 0, height: 0, tiles: [] };
   }
-  return out;
-}
 
+  const columnWidth = columns === 1 ? viewport.vw : (viewport.vw - gap * (columns - 1)) / columns;
+  const positions = Array.from({ length: columns }, () => 0);
+  const tiles: TileRect[] = [];
+
+  for (const item of items) {
+    const columnIndex = positions.indexOf(Math.min(...positions));
+    const width = columnWidth;
+    const height = width / (item.aspect || 1);
+    const x = columnIndex * (width + gap);
+    const y = positions[columnIndex];
+
+    tiles.push({ slug: item.slug, x, y, w: width, h: height });
+    positions[columnIndex] = y + height + gap;
+  }
+
+  const masonryWidth = columns * columnWidth + gap * Math.max(columns - 1, 0);
+  const masonryHeight = Math.max(0, Math.max(...positions) - gap);
+
+  return {
+    columns,
+    width: masonryWidth,
+    height: masonryHeight,
+    tiles
+  };
+}

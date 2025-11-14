@@ -4,15 +4,15 @@
   import ShowreelRow from '$lib/rows/ShowreelRow.svelte';
   import ServicesRow from '$lib/rows/ServicesRow.svelte';
   import ContactRow from '$lib/rows/ContactRow.svelte';
-  import PhotoRow from '$lib/rows/PhotoRow.svelte';
-  import FilmRow from '$lib/rows/FilmRow.svelte';
   import AboutRow from '$lib/rows/AboutRow.svelte';
+  import SiteGalleryLayer from '$lib/gallery/SiteGalleryLayer.svelte';
 
   import { camera, focus, api } from '$lib/stores/camera';
   import type { Row } from '$lib/content';
   import { spacing } from '$lib/utopia/tokens';
 
-  const rows: ReadonlyArray<Row> = contentRows;
+  const hiddenRowTypes = new Set<Row['type']>(['photoGallery', 'filmGallery']);
+  const rows: ReadonlyArray<Row> = contentRows.filter((row) => !hiddenRowTypes.has(row.type));
   const tileSpacing = spacing.s5;
 
   const resolve = (type: string) => {
@@ -22,8 +22,6 @@
       case 'showreel': return ShowreelRow;
       case 'services': return ServicesRow;
       case 'contact': return ContactRow;
-      case 'photoGallery': return PhotoRow;
-      case 'filmGallery': return FilmRow;
       default: return HeroRow;
     }
   };
@@ -35,10 +33,7 @@
 
   const activateRow = (row: Row) => {
     if ($focus.kind !== 'grid') return;
-    const tileIndex =
-      (row.type === 'photoGallery' || row.type === 'filmGallery' || row.type === 'about') && Array.isArray(row.items) && row.items.length > 0
-        ? 0
-        : undefined;
+    const tileIndex = row.type === 'about' && Array.isArray(row.items) && row.items.length > 0 ? 0 : undefined;
     void api.focusRow(row.slug, tileIndex);
   };
 
@@ -76,6 +71,8 @@
 
 <div class="grid">
   <div class="stack" style={`transform:${transform}`}>
+    <!-- Media overlay layer (visible in grid state) -->
+    <SiteGalleryLayer {rows} />
     {#each rows as row, i (row.slug)}
       {@const RowComponent = resolve(row.type)}
       {#if RowComponent}

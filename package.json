@@ -19,7 +19,8 @@
     "test:unit": "node scripts/run-vitest.mjs",
     "test:e2e": "playwright test",
     "test": "pnpm run lint && pnpm run test:unit && pnpm run test:e2e",
-    "test:ci": "pnpm run lint && pnpm run test:unit && pnpm run test:e2e --reporter=list"
+    "test:ci": "pnpm run lint && pnpm run test:unit && pnpm run test:e2e --reporter=list",
+    "organize:portfolio": "node scripts/organize-portfolio.mjs"
   },
   "dependencies": {
     "@sveltejs/kit": "^2.5.0",

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="48" viewBox="0 0 200 48" role="img" aria-labelledby="title desc">
+  <title id="title">Shutterstock logo</title>
+  <desc id="desc">Simplified Shutterstock logotype for placeholder use</desc>
+  <rect width="200" height="48" rx="8" fill="#111827" />
+  <g fill="#f24822">
+    <rect x="20" y="16" width="12" height="2" rx="1" />
+    <rect x="24" y="12" width="2" height="12" rx="1" />
+    <rect x="168" y="20" width="12" height="2" rx="1" />
+    <rect x="172" y="16" width="2" height="12" rx="1" />
+  </g>
+  <text x="50" y="30" fill="#f9fafb" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="0.02em">
+    shutterstock
+  </text>
+</svg>
