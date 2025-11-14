@@ -1,18 +1,6 @@
 {
   "rows": [
     {
-      "type": "photoGallery",
-      "slug": "photo",
-      "title": "PHOTO",
-      "items": [
-        { "slug": "desert-dawn", "title": "Desert Dawn", "image": "/images/photo/desert-dawn.jpg" },
-        { "slug": "midnight-dunes", "title": "Midnight Dunes", "image": "/images/photo/midnight-dunes.jpg" },
-        { "slug": "alpine-lakes", "title": "Alpine Lakes", "image": "/images/photo/alpine-lakes.jpg" },
-        { "slug": "city-of-glass", "title": "City of Glass", "image": "/images/photo/city-of-glass.jpg" },
-        { "slug": "crimson-horizon", "title": "Crimson Horizon", "image": "/images/photo/crimson-horizon.jpg" }
-      ]
-    },
-    {
       "type": "about",
       "slug": "about",
       "items": [
@@ -38,19 +26,19 @@
         }
       ]
     },
-    { "type": "hero", "slug": "hero" },
-    { "type": "contact", "slug": "contact" },
     {
       "type": "showreel",
       "slug": "showreel",
       "stills": [
-        "/images/showreel/1.jpg",
-        "/images/showreel/2.jpg",
-        "/images/showreel/3.jpg",
-        "/images/showreel/4.jpg"
+        "/images/portfolio/photos/earth-puja-21-of-45.jpg",
+        "/images/portfolio/photos/film-himal-sicker-01.jpg",
+        "/images/portfolio/photos/everest-clean-1-of-2.jpg",
+        "/images/portfolio/photos/heli-rescue-1-of-2.jpg"
       ],
       "externalUrl": "https://youtube.com/..."
     },
+    { "type": "hero", "slug": "hero" },
+    { "type": "contact", "slug": "contact" },
     {
       "type": "services",
       "slug": "services",
@@ -66,6 +54,18 @@
       "shutterstockLogo": "/images/logos/shutterstock.svg"
     },
     {
+      "type": "photoGallery",
+      "slug": "photo",
+      "title": "PHOTO",
+      "items": [
+        { "slug": "desert-dawn", "title": "Desert Dawn", "image": "/images/photo/desert-dawn.avif" },
+        { "slug": "midnight-dunes", "title": "Midnight Dunes", "image": "/images/photo/midnight-dunes.avif" },
+        { "slug": "alpine-lakes", "title": "Alpine Lakes", "image": "/images/photo/alpine-lakes.avif" },
+        { "slug": "city-of-glass", "title": "City of Glass", "image": "/images/photo/city-of-glass.avif" },
+        { "slug": "crimson-horizon", "title": "Crimson Horizon", "image": "/images/photo/crimson-horizon.avif" }
+      ]
+    },
+    {
       "type": "filmGallery",
       "slug": "film",
       "title": "FILM",
@@ -73,25 +73,25 @@
         {
           "slug": "brand-film-x",
           "title": "Brand Film X",
-          "poster": "/images/film/brand-film-x.jpg",
+          "poster": "/images/film/brand-film-x.avif",
           "externalUrl": "https://vimeo.com/..."
         },
         {
           "slug": "documentary-sierra",
           "title": "Documentary Sierra",
-          "poster": "/images/film/documentary-sierra.jpg",
+          "poster": "/images/film/documentary-sierra.avif",
           "externalUrl": "https://vimeo.com/.../sierra"
         },
         {
           "slug": "music-video-neon",
           "title": "Music Video Neon",
-          "poster": "/images/film/music-video-neon.jpg",
+          "poster": "/images/photo/alpine-lakes.avif",
           "externalUrl": "https://vimeo.com/.../neon"
         },
         {
           "slug": "short-film-harbor",
           "title": "Short Film Harbor",
-          "poster": "/images/film/short-film-harbor.jpg",
+          "poster": "/images/photo/city-of-glass.avif",
           "externalUrl": "https://vimeo.com/.../harbor"
         }
       ]
