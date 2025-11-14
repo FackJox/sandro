@@ -10,7 +10,8 @@ import {
 } from './camera-controller';
 import type { CameraState } from '$lib/config/geometry';
 
-const GRID_COLUMNS = 1;
+// Expand grid width to allow horizontal panning to media bands in grid view
+const GRID_COLUMNS = 4;
 const GRID_DIMENSIONS = {
   columns: GRID_COLUMNS,
   rows: Math.max(1, Math.ceil(rows.length / GRID_COLUMNS))
@@ -46,7 +47,10 @@ const controller = createCameraController(
     motion: get(motion),
     immediate: shouldUseImmediate,
     onUpdate: (cameraState, focusState) => {
-      console.log('[camera] onUpdate -> focus', focusState);
+      // Reduce noisy dev logs to avoid performance issues in browsers
+      if (typeof window !== 'undefined' && (window as any).__DEBUG_CAMERA) {
+        console.log('[camera] onUpdate -> focus', focusState);
+      }
       camera.set({ ...cameraState });
       focus.set({ ...focusState });
     }
